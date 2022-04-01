@@ -1,14 +1,13 @@
 ﻿namespace RentalCars
 {
-    public class Car
+    public abstract class Car
     {
-        public Car(PriceCode priceCode, string model)
+        public Car(string model)
         {
-            PriceCode = priceCode;
+
             Model = model;
         }
-
-        public PriceCode PriceCode { get; }
         public string Model { get; }
+        public abstract double calculateAmount(int daysRented, double pricePerDay);
     }
 }

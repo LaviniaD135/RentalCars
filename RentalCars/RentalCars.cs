@@ -1,12 +1,20 @@
-﻿using System;
+﻿using RentalCars.Cars;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RentalCars
 {
     public class RentalCars
     {
-        private readonly List<Rental> _rentals = new List<Rental>();
+        private const string RENTAL_RECORD_FOR = "Rental Record for ";
+        private const string BORDER = "----------------------------------------------\n";
+        private const string EURO = " EUR";
+        private const string DAYS = " days";
+        private const int PRICE_PER_DAY_IN_BUCHAREST = 30;
+        private const int PRICE_PER_DAY_IN_IASI = 20;
+        private const string TOTAL_REVENUE = "Total revenue ";
 
+        private readonly List<Rental> _rentals = new List<Rental>();
         public RentalCars(string name)
         {
             Name = name;
@@ -19,57 +27,71 @@ namespace RentalCars
             _rentals.Add(rental);
             rental.Customer.AddRental(rental);
         }
-
         public string Statement()
         {
-            double pricePerDay = 20;
             double totalAmount = 0;
-            var frequentRenterPoints = 0;
+            var rentalRecord = RENTAL_RECORD_FOR + Name + "\n";
+            rentalRecord += BORDER;
 
-            var r = "Rental Record for " + Name + "\n";
-            r += "------------------------------\n";
-
-            foreach (var each in _rentals)
+            foreach (Rental rental in _rentals)
             {
-                double thisAmount = 0;
-
-                // determines the amount for each line
-                switch (each.Car.PriceCode)
-                {
-                    case PriceCode.Regular:
-                        thisAmount += pricePerDay * 2;
-                        if (each.DaysRented > 2)
-                            thisAmount += (each.DaysRented - 2) * pricePerDay * 0.75;
-                        break;
-                    case PriceCode.Premium:
-                        thisAmount += each.DaysRented * pricePerDay * 1.5;
-                        break;
-                    case PriceCode.Mini:
-                        thisAmount += pricePerDay * 3 * 0.75;
-                        if (each.DaysRented > 3)
-                            thisAmount += (each.DaysRented - 3) * pricePerDay * 0.5;
-                        break;
-                }
-
-                if (each.Customer.FrequentRenterPoints >= 5)
-                {
-                    thisAmount = thisAmount * 0.95;
-                }
-
-                frequentRenterPoints = 1;
-                if (each.Car.PriceCode == PriceCode.Premium
-                    && each.DaysRented > 1)
-                    frequentRenterPoints++;
-
-                each.Customer.FrequentRenterPoints += frequentRenterPoints;
-
-                r += each.Customer.Name + "\t" + each.Car.Model + "\t" + each.DaysRented + "d \t" + thisAmount + " EUR\n";
+                double thisAmount = CalculateFinalAmount(rental);
+                rentalRecord += rental.Customer.Name + "\t" + rental.Car.Model + "\t" + rental.DaysRented + DAYS + "\t" + thisAmount + EURO + "\n";
                 totalAmount += thisAmount;
             }
-            r += "------------------------------\n";
-            r += "Total revenue " + totalAmount + " EUR\n";
+            rentalRecord += BORDER;
+            rentalRecord += TOTAL_REVENUE + totalAmount + EURO;
 
-            return r;
+            return rentalRecord;
+        }
+
+        private static double CalculateFinalAmount(Rental rental)
+        {
+            double thisAmount = 0;
+            switch (rental.Location)
+            {
+                case Location.Iasi:
+                    rental.calculateFrequentRenterPoints();
+                    thisAmount += rental.calculateRentPrice(PRICE_PER_DAY_IN_IASI);
+                    break;
+
+                case Location.Bucharest:
+                    rental.calculateFrequentRenterPoints();
+                    thisAmount += rental.calculateRentPrice(PRICE_PER_DAY_IN_BUCHAREST);
+                    break;
+            }
+
+            return thisAmount;
+        }
+
+        public string StatementGroupedByCarCategory()
+        {
+            var groupedRentals = _rentals.GroupBy(rental => rental.Car.GetType().Name);
+            var rentalRecord = RENTAL_RECORD_FOR + Name + "\n";
+            rentalRecord += BORDER;
+            double totalAmount = 0;
+
+
+            foreach (var group in groupedRentals)
+            {
+                double sum = 0;
+                foreach (Rental rental in group)
+                {
+                    double thisAmount = CalculateFinalAmount(rental);
+
+                    sum += thisAmount;
+
+                }
+                rentalRecord += group.Key + "\t" + sum + EURO + "\n";
+                rentalRecord += BORDER;
+                totalAmount += sum;
+            }
+
+
+            rentalRecord += TOTAL_REVENUE + totalAmount + EURO;
+
+            return rentalRecord;
+
         }
     }
 }
