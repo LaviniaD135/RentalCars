@@ -36,13 +36,14 @@ namespace RentalCars
             foreach (Rental rental in _rentals)
             {
                 double thisAmount = CalculateFinalAmount(rental);
-                rentalRecord += rental.Customer.Name + "\t" + rental.Car.Model + "\t" + rental.DaysRented + DAYS + "\t" + thisAmount + EURO + "\n";
+                rentalRecord += rental.Customer.Name + "\t" + rental.Car.Model + "\t" + rental.DaysRented + DAYS + "\t"  + thisAmount + EURO + "\n";
                 totalAmount += thisAmount;
             }
             rentalRecord += BORDER;
             rentalRecord += TOTAL_REVENUE + totalAmount + EURO;
 
             return rentalRecord;
+            
         }
 
         private static double CalculateFinalAmount(Rental rental)
@@ -51,13 +52,11 @@ namespace RentalCars
             switch (rental.Location)
             {
                 case Location.Iasi:
-                    rental.calculateFrequentRenterPoints();
-                    thisAmount += rental.calculateRentPrice(PRICE_PER_DAY_IN_IASI);
+                    thisAmount += rental.calculateRentalPrice(PRICE_PER_DAY_IN_IASI);
                     break;
 
                 case Location.Bucharest:
-                    rental.calculateFrequentRenterPoints();
-                    thisAmount += rental.calculateRentPrice(PRICE_PER_DAY_IN_BUCHAREST);
+                    thisAmount += rental.calculateRentalPrice(PRICE_PER_DAY_IN_BUCHAREST);
                     break;
             }
 

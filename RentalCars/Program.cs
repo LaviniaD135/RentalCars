@@ -29,9 +29,12 @@ namespace RentalCars
             Console.WriteLine();
             Console.WriteLine(store1.Statement());
             Console.WriteLine();
-            Console.WriteLine(store2.StatementGroupedByCarCategory());
+            Console.WriteLine(store2.Statement());
             Console.WriteLine();
             Console.WriteLine(store1.StatementGroupedByCarCategory());
+            Console.WriteLine();
+            Console.WriteLine(store2.StatementGroupedByCarCategory());
+            
             Console.ReadKey();
 
         }
